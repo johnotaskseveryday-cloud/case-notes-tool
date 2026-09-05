@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 p-4 font-sans text-xs">
+
+  <div class="grid grid-cols-12 gap-4 items-start">
+    
+    <!-- Input Form -->
+    <div class="col-span-7 space-y-4">
+
+      <!-- First Order Radio -->
+      <div class="bg-white rounded-lg p-3.5 border border-slate-200 shadow-sm">
+        <label class="block font-semibold text-slate-900 mb-2">Is this a first order? *</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center justify-center p-2 rounded border cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+            <input type="radio" name="firstOrderRadio" value="Yes" class="sr-only" onchange="toggleOrderQuestions('Yes')">
+            <span class="font-semibold text-slate-700"><i class="fa-solid fa-circle-check text-blue-600 mr-1"></i> Yes (First Order)</span>
+          </label>
+          <label class="flex items-center justify-center p-2 rounded border cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+            <input type="radio" name="firstOrderRadio" value="No" class="sr-only" onchange="toggleOrderQuestions('No')">
+            <span class="font-semibold text-slate-700"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i> No (Subsequent Order)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Powersearch -->
+      <div class="bg-white rounded-lg p-3.5 border border-slate-200 shadow-sm space-y-3">
+        <h2 class="font-bold text-slate-900 border-b pb-1.5 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-magnifying-glass text-indigo-500 mr-1"></i> Powersearch</h2>
+        
+        <div>
+          <label class="block font-bold text-slate-500 uppercase mb-1.5 text-[10px]">Verification Checks</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="EMPS" onchange="updateLivePreview()"> EMPS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="PNPS" onchange="updateLivePreview()"> PNPS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="BAPS" onchange="updateLivePreview()"> BAPS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="DAPS" onchange="updateLivePreview()"> DAPS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="IPPS" onchange="updateLivePreview()"> IPPS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="DevicePS" onchange="updateLivePreview()"> DevicePS</label>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block font-bold text-slate-500 uppercase mb-1.5 text-[10px]">Purchase Pattern Subchoices</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="patternCheck" value="Consistent purchase pattern" onchange="updateLivePreview()"> Consistent pattern</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="patternCheck" value="Sudden change in purchase pattern" onchange="updateLivePreview()"> Sudden pattern change</label>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Powersearch Notes</label>
+          <textarea id="powersearchNotes" rows="2" class="w-full rounded border border-slate-300 p-2 text-slate-900 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Notes..." oninput="updateLivePreview()"></textarea>
+        </div>
+      </div>
+
+      <!-- YES Branch -->
+      <div id="yesBranchSection" class="hidden bg-white rounded-lg p-3.5 border border-slate-200 shadow-sm space-y-3">
+        <h2 class="font-bold text-slate-900 border-b pb-1.5 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-sliders text-blue-600 mr-1"></i> First Order Attributes</h2>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Account with Merchant</label>
+            <select id="accountYes" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="New buyer">New buyer</option>
+              <option value="Guest checkout">Guest checkout</option>
+              <option value="Established buyer">Established buyer</option>
+              <option value="Old account-Potentially dormant">Old account-Potentially dormant</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Phone Status</label>
+            <select id="phoneSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="ties to CH">ties to CH</option>
+              <option value="ties to DR">ties to DR</option>
+              <option value="ties to business">ties to business</option>
+              <option value="Merchant phone">Merchant phone</option>
+              <option value="Reshipper phone">Reshipper phone</option>
+              <option value="Non-fixed VOIP">Non-fixed VOIP</option>
+              <option value="No phones found">No phones found</option>
+              <option value="Invalid">Invalid</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Email Age</label>
+            <select id="emailAgeSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="is aged">is aged</option>
+              <option value="is new">is new</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Email Link</label>
+            <select id="emailTieSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="ties to CH">ties to CH</option>
+              <option value="ties to DR">ties to DR</option>
+              <option value="gibberish">gibberish</option>
+              <option value="multiple names linked">multiple names linked</option>
+              <option value="does not tie to CH/DR">does not tie to CH/DR</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Billing Address</label>
+            <select id="billingSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="ties to CH">ties to CH</option>
+              <option value="ties to DR">ties to DR</option>
+              <option value="military address">military address</option>
+              <option value="reshipper address">reshipper address</option>
+              <option value="does not tie to CH/DR">does not tie to CH/DR</option>
+              <option value="manipulated address">manipulated address</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Delivery Address</label>
+            <select id="deliverySelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="ties to CH">ties to CH</option>
+              <option value="ties to DR">ties to DR</option>
+              <option value="military address">military address</option>
+              <option value="reshipper address">reshipper address</option>
+              <option value="does not tie to CH/DR">does not tie to CH/DR</option>
+              <option value="manipulated address">manipulated address</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">IP Type</label>
+            <select id="ipSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="Consistent">Consistent</option>
+              <option value="Shared">Shared</option>
+              <option value="Mobile">Mobile</option>
+              <option value="Proxy/hosting">Proxy/hosting</option>
+              <option value="Business IP">Business IP</option>
+              <option value="School/University IP">School/University IP</option>
+              <option value="Merchant IP">Merchant IP</option>
+              <option value="No data">No data</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Device Analysis</label>
+            <select id="deviceSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="Consistent">Consistent</option>
+              <option value="Merchant">Merchant</option>
+              <option value="Multiple unrelated names linked to device">Multiple unrelated names linked to device</option>
+              <option value="No data">No data</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Credit Card Verification</label>
+            <select id="ccSelect" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+              <option value="">-- Select --</option>
+              <option value="AVS full match">AVS full match</option>
+              <option value="Complete AVS failure">Complete AVS failure</option>
+              <option value="ZIP-only Match">ZIP-only Match</option>
+              <option value="BIN country mismatch">BIN country mismatch</option>
+              <option value="Business/Corporate CC used">Business/Corporate CC used</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- NO Branch -->
+      <div id="noBranchSection" class="hidden bg-white rounded-lg p-3.5 border border-slate-200 shadow-sm space-y-2">
+        <h2 class="font-bold text-slate-900 border-b pb-1 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i> Subsequent Order Attributes</h2>
+        <div>
+          <label class="block font-bold text-slate-500 uppercase mb-1 text-[10px]">Account with Merchant</label>
+          <select id="accountNo" class="w-full rounded border border-slate-300 p-1.5 text-slate-800" onchange="updateLivePreview()">
+            <option value="">-- Select --</option>
+            <option value="New buyer">New buyer</option>
+            <option value="Guest checkout">Guest checkout</option>
+            <option value="Established buyer">Established buyer</option>
+            <option value="Old account-Potentially dormant">Old account-Potentially dormant</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="bg-white rounded-lg p-3.5 border border-slate-200 shadow-sm space-y-1">
+        <label class="block font-bold text-slate-500 uppercase text-[10px]"><i class="fa-solid fa-pen-to-square text-emerald-500 mr-1"></i> Summary & Final Decision</label>
+        <textarea id="summaryInput" rows="2" class="w-full rounded border border-slate-300 p-2 text-slate-900 focus:ring-1 focus:ring-blue-500 outline-none" placeholder="Summary..." oninput="updateLivePreview()"></textarea>
+      </div>
+
+    </div>
+
+    <!-- Output Box -->
+    <div class="col-span-5 sticky top-0">
+      <div class="bg-slate-900 text-slate-100 rounded-lg p-3.5 shadow-md border border-slate-800 flex flex-col h-[650px]">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+          <span class="font-bold uppercase tracking-wider text-[10px] text-slate-300"><i class="fa-solid fa-code text-blue-400 mr-1"></i> Case Note Preview</span>
+        </div>
+        <div class="flex-1 bg-slate-950 rounded p-3 font-mono text-[11px] leading-relaxed text-slate-300 border border-slate-800/80 overflow-y-auto whitespace-pre-wrap" id="formattedPreview">Select whether this is a first order...</div>
+        <div class="pt-3 space-y-2">
+          <button onclick="insertToSheet()" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-file-import"></i> Insert into Active Cell
+          </button>
+          <button onclick="copyToClipboard()" class="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-copy"></i> Copy Note
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleOrderQuestions(answer) {
+      document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
+      document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
+      updateLivePreview();
+    }
+
+    function getCheckedValues(name) {
+      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+    }
+
+    function updateLivePreview() {
+      const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
+      const formattedPreview = document.getElementById('formattedPreview');
+
+      if (!selectedRadio) {
+        formattedPreview.textContent = 'Select whether this is a first order...';
+        return;
+      }
+
+      const isFirstOrder = selectedRadio.value;
+      let output = `CASE NOTES\n========================================\nFIRST ORDER: ${isFirstOrder.toUpperCase()}\n========================================\n\n`;
+
+      const psChecks = getCheckedValues('powersearchCheck');
+      const patternChecks = getCheckedValues('patternCheck');
+      const psNotes = document.getElementById('powersearchNotes').value.trim();
+
+      output += `[POWERSEARCH]\n`;
+      output += `- Verification Checks: ${psChecks.length ? psChecks.join(', ') : 'None'}\n`;
+      output += `- Purchase Pattern: ${patternChecks.length ? patternChecks.join(', ') : 'None'}\n`;
+      if (psNotes) output += `- Additional Notes: ${psNotes}\n`;
+      output += `\n`;
+
+      if (isFirstOrder === 'Yes') {
+        output += `[FIRST ORDER ATTRIBUTES]\n`;
+        output += `- Account with merchant: ${document.getElementById('accountYes').value || 'N/A'}\n`;
+        output += `- Email: ${document.getElementById('emailAgeSelect').value || 'N/A'} (${document.getElementById('emailTieSelect').value || 'N/A'})\n`;
+        output += `- Phone: ${document.getElementById('phoneSelect').value || 'N/A'}\n`;
+        output += `- Billing: ${document.getElementById('billingSelect').value || 'N/A'}\n`;
+        output += `- Delivery: ${document.getElementById('deliverySelect').value || 'N/A'}\n`;
+        output += `- IP: ${document.getElementById('ipSelect').value || 'N/A'}\n`;
+        output += `- Device: ${document.getElementById('deviceSelect').value || 'N/A'}\n`;
+        output += `- Credit Card: ${document.getElementById('ccSelect').value || 'N/A'}\n\n`;
+      } else {
+        output += `[SUBSEQUENT ORDER ATTRIBUTES]\n`;
+        output += `- Account with merchant: ${document.getElementById('accountNo').value || 'N/A'}\n\n`;
+      }
+
+      const summaryText = document.getElementById('summaryInput').value.trim();
+      output += `========================================\nSUMMARY & FINAL DECISION:\n${summaryText || 'N/A'}`;
+
+      formattedPreview.textContent = output;
+    }
+
+    function insertToSheet() {
+      const text = document.getElementById('formattedPreview').textContent;
+      google.script.run.withSuccessHandler(() => {
+        google.script.host.close();
+      }).insertNoteToActiveCell(text);
+    }
+
+    function copyToClipboard() {
+      navigator.clipboard.writeText(document.getElementById('formattedPreview').textContent);
+    }
+  </script>
+</body>
+</html>
