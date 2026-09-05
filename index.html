@@ -18,11 +18,11 @@
         <div class="grid grid-cols-2 gap-2">
           <label class="flex items-center justify-center p-2 rounded border cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
             <input type="radio" name="firstOrderRadio" value="Yes" class="sr-only" onchange="toggleOrderQuestions('Yes')">
-            <span class="font-semibold text-slate-700"><i class="fa-solid fa-circle-check text-blue-600 mr-1"></i> Yes (First Order)</span>
+            <span class="font-semibold text-slate-700"><i class="fa-solid fa-circle-check text-blue-600 mr-1"></i> Yes </span>
           </label>
           <label class="flex items-center justify-center p-2 rounded border cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
             <input type="radio" name="firstOrderRadio" value="No" class="sr-only" onchange="toggleOrderQuestions('No')">
-            <span class="font-semibold text-slate-700"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i> No (Subsequent Order)</span>
+            <span class="font-semibold text-slate-700"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i> No </span>
           </label>
         </div>
       </div>
@@ -33,20 +33,20 @@
         
         <div>
           <div class="grid grid-cols-3 gap-1.5">
-            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="EMPS" onchange="updateLivePreview()"> EMPS</label>
-            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="PNPS" onchange="updateLivePreview()"> PNPS</label>
-            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="BAPS" onchange="updateLivePreview()"> BAPS</label>
-            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="DAPS" onchange="updateLivePreview()"> DAPS</label>
-            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="IPPS" onchange="updateLivePreview()"> IPPS</label>
-            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="DevicePS" onchange="updateLivePreview()"> DevicePS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="EMPS" onchange="updateLivePreview()"> EM PS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="PNPS" onchange="updateLivePreview()"> PN PS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="BAPS" onchange="updateLivePreview()"> BA PS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="DAPS" onchange="updateLivePreview()"> DA PS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="IPPS" onchange="updateLivePreview()"> IP PS</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="powersearchCheck" value="DevicePS" onchange="updateLivePreview()"> Device PS</label>
           </div>
         </div>
 
         <div class="pt-2 border-t border-slate-100">
-          <label class="block font-bold text-slate-500 uppercase mb-1.5 text-[10px]">Purchase Pattern Subchoices</label>
           <div class="grid grid-cols-2 gap-1.5">
             <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="patternCheck" value="Consistent purchase pattern" onchange="updateLivePreview()"> Consistent pattern</label>
             <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="patternCheck" value="Sudden change in purchase pattern" onchange="updateLivePreview()"> Sudden pattern change</label>
+            <label class="flex items-center gap-1.5 p-1.5 rounded border border-slate-200 cursor-pointer text-slate-700"><input type="checkbox" name="patternCheck" value="Orders are recent" onchange="updateLivePreview()"> Orders are recent </label>
           </div>
         </div>
 
