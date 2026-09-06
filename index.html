@@ -209,42 +209,94 @@
   </div>
 
   <script>
-    function submitNotes() {
-      let notes = ["Order Review Checklist"];
+  function toggleOrderQuestions(answer) {
+    document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
+    document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
+    updateLivePreview();
+  }
 
-      const fields = [
-        { label: "Powersearch", selId: "powersearchSelect", txtId: "powersearchText" },
-        { label: "Account", selId: "accountSelect", txtId: "accountText" },
-        { label: "IP Status", selId: "ipStatusSelect", txtId: "ipStatusText" },
-        { label: "Email", selId: "emailSelect", txtId: "emailText" },
-        { label: "BA/DA", selId: "badaSelect", txtId: "badaText" },
-        { label: "Items", selId: "itemsSelect", txtId: "itemsText" },
-        { label: "Other Findings", selId: "otherFindingsSelect", txtId: "otherFindingsText" }
-      ];
+  function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+  }
 
-      fields.forEach(f => {
-        let selVal = document.getElementById(f.selId).value;
-        let txtVal = document.getElementById(f.txtId).value.trim();
+  function getSelectValue(id) {
+    const el = document.getElementById(id);
+    return (el && el.value && el.value !== "") ? el.value : null;
+  }
 
-        // Only add if at least one field is filled out
-        if (selVal || txtVal) {
-          let line = f.label + ":" + (selVal ? " " + selVal : "");
-          if (txtVal) {
-            line += "\n" + txtVal; // Places custom text on the next line underneath
-          }
-          notes.push(line);
-        }
-      });
+  function updateLivePreview() {
+    const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
+    const formattedPreview = document.getElementById('formattedPreview');
 
-      // Send formatted output to the active cell
-      if (notes.length > 1) {
-        google.script.run.appendNoteToSheet(notes.join("\n"));
+    if (!selectedRadio) {
+      formattedPreview.textContent = 'Select whether this is a first order...';
+      return;
+    }
+
+    const isFirstOrder = selectedRadio.value;
+    let output = `CASE NOTES\n========================================\nFIRST ORDER: ${isFirstOrder.toUpperCase()}\n========================================\n\n`;
+
+    // Powersearch Info
+    const psChecks = getCheckedValues('powersearchCheck');
+    const patternChecks = getCheckedValues('patternCheck');
+    const psNotes = document.getElementById('powersearchNotes').value.trim();
+
+    if (psChecks.length > 0 || patternChecks.length > 0 || psNotes !== '') {
+      output += `[POWERSEARCH]\n`;
+      if (psChecks.length > 0) output += `- Verification Checks: ${psChecks.join(', ')}\n`;
+      if (patternChecks.length > 0) output += `- Purchase Pattern: ${patternChecks.join(', ')}\n`;
+      if (psNotes !== '') output += `- Additional Notes: ${psNotes}\n`;
+      output += `\n`;
+    }
+
+    // Branch Attributes
+    if (isFirstOrder === 'Yes') {
+      const attributes = [
+        { label: 'Account with merchant', val: getSelectValue('accountYes') },
+        { label: 'Phone', val: getSelectValue('phoneSelect') },
+        { label: 'Email Age', val: getSelectValue('emailAgeSelect') },
+        { label: 'Email Link', val: getSelectValue('emailTieSelect') },
+        { label: 'Billing Address', val: getSelectValue('billingSelect') },
+        { label: 'Delivery Address', val: getSelectValue('deliverySelect') },
+        { label: 'IP Analysis', val: getSelectValue('ipSelect') },
+        { label: 'Device Analysis', val: getSelectValue('deviceSelect') },
+        { label: 'Credit Card', val: getSelectValue('ccSelect') }
+      ].filter(attr => attr.val !== null);
+
+      if (attributes.length > 0) {
+        output += `[FIRST ORDER ATTRIBUTES]\n`;
+        attributes.forEach(attr => {
+          output += `- ${attr.label}: ${attr.val}\n`;
+        });
+        output += `\n`;
+      }
+    } else {
+      const acctNo = getSelectValue('accountNo');
+      if (acctNo) {
+        output += `[SUBSEQUENT ORDER ATTRIBUTES]\n`;
+        output += `- Account with merchant: ${acctNo}\n\n`;
       }
     }
 
-    function resetForm() {
-      document.getElementById('checklistForm').reset();
+    // Summary Block
+    const summaryText = document.getElementById('summaryInput').value.trim();
+    if (summaryText !== '') {
+      output += `========================================\nSUMMARY & FINAL DECISION:\n${summaryText}`;
     }
-  </script>
+
+    formattedPreview.textContent = output.trim();
+  }
+
+  function insertToSheet() {
+    const text = document.getElementById('formattedPreview').textContent;
+    google.script.run.withSuccessHandler(() => {
+      google.script.host.close();
+    }).insertNoteToActiveCell(text);
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(document.getElementById('formattedPreview').textContent);
+  }
+</script>
 </body>
 </html>
