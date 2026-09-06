@@ -209,68 +209,41 @@
   </div>
 
   <script>
-    function toggleOrderQuestions(answer) {
-      document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
-      document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
-      updateLivePreview();
-    }
+    function submitNotes() {
+      let notes = ["Order Review Checklist"];
 
-    function getCheckedValues(name) {
-      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-    }
+      const fields = [
+        { label: "Powersearch", selId: "powersearchSelect", txtId: "powersearchText" },
+        { label: "Account", selId: "accountSelect", txtId: "accountText" },
+        { label: "IP Status", selId: "ipStatusSelect", txtId: "ipStatusText" },
+        { label: "Email", selId: "emailSelect", txtId: "emailText" },
+        { label: "BA/DA", selId: "badaSelect", txtId: "badaText" },
+        { label: "Items", selId: "itemsSelect", txtId: "itemsText" },
+        { label: "Other Findings", selId: "otherFindingsSelect", txtId: "otherFindingsText" }
+      ];
 
-    function updateLivePreview() {
-      const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
-      const formattedPreview = document.getElementById('formattedPreview');
+      fields.forEach(f => {
+        let selVal = document.getElementById(f.selId).value;
+        let txtVal = document.getElementById(f.txtId).value.trim();
 
-      if (!selectedRadio) {
-        formattedPreview.textContent = 'Select whether this is a first order...';
-        return;
+        // Only add if at least one field is filled out
+        if (selVal || txtVal) {
+          let line = f.label + ":" + (selVal ? " " + selVal : "");
+          if (txtVal) {
+            line += "\n" + txtVal; // Places custom text on the next line underneath
+          }
+          notes.push(line);
+        }
+      });
+
+      // Send formatted output to the active cell
+      if (notes.length > 1) {
+        google.script.run.appendNoteToSheet(notes.join("\n"));
       }
-
-      const isFirstOrder = selectedRadio.value;
-      let output = `CASE NOTES\n========================================\nFIRST ORDER: ${isFirstOrder.toUpperCase()}\n========================================\n\n`;
-
-      const psChecks = getCheckedValues('powersearchCheck');
-      const patternChecks = getCheckedValues('patternCheck');
-      const psNotes = document.getElementById('powersearchNotes').value.trim();
-
-      output += `[POWERSEARCH]\n`;
-      output += `- Verification Checks: ${psChecks.length ? psChecks.join(', ') : 'None'}\n`;
-      output += `- Purchase Pattern: ${patternChecks.length ? patternChecks.join(', ') : 'None'}\n`;
-      if (psNotes) output += `- Additional Notes: ${psNotes}\n`;
-      output += `\n`;
-
-      if (isFirstOrder === 'Yes') {
-        output += `[FIRST ORDER ATTRIBUTES]\n`;
-        output += `- Account with merchant: ${document.getElementById('accountYes').value || 'N/A'}\n`;
-        output += `- Email: ${document.getElementById('emailAgeSelect').value || 'N/A'} (${document.getElementById('emailTieSelect').value || 'N/A'})\n`;
-        output += `- Phone: ${document.getElementById('phoneSelect').value || 'N/A'}\n`;
-        output += `- Billing: ${document.getElementById('billingSelect').value || 'N/A'}\n`;
-        output += `- Delivery: ${document.getElementById('deliverySelect').value || 'N/A'}\n`;
-        output += `- IP: ${document.getElementById('ipSelect').value || 'N/A'}\n`;
-        output += `- Device: ${document.getElementById('deviceSelect').value || 'N/A'}\n`;
-        output += `- Credit Card: ${document.getElementById('ccSelect').value || 'N/A'}\n\n`;
-      } else {
-        output += `[SUBSEQUENT ORDER ATTRIBUTES]\n`;
-        output += `- Account with merchant: ${document.getElementById('accountNo').value || 'N/A'}\n\n`;
-      }
-
-      const summaryText = document.getElementById('summaryInput').value.trim();
-      output += `========================================\nSUMMARY & FINAL DECISION:\n${summaryText || 'N/A'}`;
-
-      formattedPreview.textContent = output;
     }
 
-    function insertToSheet() {
-      const text = document.getElementById('formattedPreview').textContent;
-      google.script.run.withSuccessHandler(() => {
-        google.script.host.close();
-      }).insertNoteToActiveCell(text);
-    }
-
-    function copyToClipboard() {
-      navigator.clipboard.writeText(document.getElementById('formattedPreview').textContent);
+    function resetForm() {
+      document.getElementById('checklistForm').reset();
     }
   </script>
 </body>
