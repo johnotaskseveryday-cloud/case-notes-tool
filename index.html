@@ -4,13 +4,25 @@
   <meta charset="UTF-8">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Styling to render HTML formatting inside preview container */
+    .checklist-preview {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #2d3748;
+      line-height: 1.45;
+    }
+    .checklist-preview b {
+      color: #1a202c;
+      font-weight: 700;
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 p-4 font-sans text-xs">
+<body class="bg-slate-100 text-slate-800 p-4 font-sans text-xs">
 
   <div class="grid grid-cols-12 gap-4 items-start">
     
     <!-- Input Form -->
-    <div class="col-span-7 space-y-4">
+    <div class="col-span-7 space-y-3.5">
 
       <!-- First Order Radio -->
       <div class="bg-white rounded-lg p-3.5 border border-slate-200 shadow-sm">
@@ -189,18 +201,22 @@
 
     </div>
 
-    <!-- Output Box -->
+    <!-- Output Box Styled like Image -->
     <div class="col-span-5 sticky top-0">
-      <div class="bg-slate-900 text-slate-100 rounded-lg p-3.5 shadow-md border border-slate-800 flex flex-col h-[650px]">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
-          <span class="font-bold uppercase tracking-wider text-[10px] text-slate-300"><i class="fa-solid fa-code text-blue-400 mr-1"></i> Case Note Preview</span>
+      <div class="bg-[#e8eef5] rounded-md p-5 border border-[#d2dbe6] shadow-sm flex flex-col h-[650px]">
+        <div class="text-[#2b3542] font-semibold text-base mb-3 border-b border-[#d2dbe6] pb-2">
+          Order Review Checklist
         </div>
-        <div class="flex-1 bg-slate-950 rounded p-3 font-mono text-[11px] leading-relaxed text-slate-300 border border-slate-800/80 overflow-y-auto whitespace-pre-wrap" id="formattedPreview">Select whether this is a first order...</div>
-        <div class="pt-3 space-y-2">
-          <button onclick="insertToSheet()" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5">
+
+        <div class="flex-1 overflow-y-auto checklist-preview space-y-2.5 text-[13px] text-[#333a42]" id="formattedPreview">
+          <span class="text-slate-400 italic">Select options to generate review notes...</span>
+        </div>
+
+        <div class="pt-4 mt-2 border-t border-[#d2dbe6] space-y-2">
+          <button onclick="insertToSheet()" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm">
             <i class="fa-solid fa-file-import"></i> Insert into Active Cell
           </button>
-          <button onclick="copyToClipboard()" class="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5">
+          <button onclick="copyToClipboard()" class="w-full py-2 rounded bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm">
             <i class="fa-solid fa-copy"></i> Copy Note
           </button>
         </div>
@@ -210,94 +226,96 @@
   </div>
 
   <script>
-  function toggleOrderQuestions(answer) {
-    document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
-    document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
-    updateLivePreview();
-  }
+    let rawTextOutput = "";
 
-  function getCheckedValues(name) {
-    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-  }
-
-  function getSelectValue(id) {
-    const el = document.getElementById(id);
-    return (el && el.value && el.value !== "") ? el.value : null;
-  }
-
-  function updateLivePreview() {
-    const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
-    const formattedPreview = document.getElementById('formattedPreview');
-
-    if (!selectedRadio) {
-      formattedPreview.textContent = 'Select whether this is a first order...';
-      return;
+    function toggleOrderQuestions(answer) {
+      document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
+      document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
+      updateLivePreview();
     }
 
-    const isFirstOrder = selectedRadio.value;
-    let output = `CASE NOTES\n========================================\nFIRST ORDER: ${isFirstOrder.toUpperCase()}\n========================================\n\n`;
-
-    // Powersearch Info
-    const psChecks = getCheckedValues('powersearchCheck');
-    const patternChecks = getCheckedValues('patternCheck');
-    const psNotes = document.getElementById('powersearchNotes').value.trim();
-
-    if (psChecks.length > 0 || patternChecks.length > 0 || psNotes !== '') {
-      output += `[POWERSEARCH]\n`;
-      if (psChecks.length > 0) output += `- Verification Checks: ${psChecks.join(', ')}\n`;
-      if (patternChecks.length > 0) output += `- Purchase Pattern: ${patternChecks.join(', ')}\n`;
-      if (psNotes !== '') output += `- Additional Notes: ${psNotes}\n`;
-      output += `\n`;
+    function getCheckedValues(name) {
+      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
     }
 
-    // Branch Attributes
-    if (isFirstOrder === 'Yes') {
-      const attributes = [
-        { label: 'Account with merchant', val: getSelectValue('accountYes') },
-        { label: 'Phone', val: getSelectValue('phoneSelect') },
-        { label: 'Email Age', val: getSelectValue('emailAgeSelect') },
-        { label: 'Email Link', val: getSelectValue('emailTieSelect') },
-        { label: 'Billing Address', val: getSelectValue('billingSelect') },
-        { label: 'Delivery Address', val: getSelectValue('deliverySelect') },
-        { label: 'IP Analysis', val: getSelectValue('ipSelect') },
-        { label: 'Device Analysis', val: getSelectValue('deviceSelect') },
-        { label: 'Credit Card', val: getSelectValue('ccSelect') }
-      ].filter(attr => attr.val !== null);
+    function getSelectValue(id) {
+      const el = document.getElementById(id);
+      return (el && el.value && el.value !== "") ? el.value : null;
+    }
 
-      if (attributes.length > 0) {
-        output += `[FIRST ORDER ATTRIBUTES]\n`;
-        attributes.forEach(attr => {
-          output += `- ${attr.label}: ${attr.val}\n`;
-        });
-        output += `\n`;
+    function updateLivePreview() {
+      const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
+      const formattedPreview = document.getElementById('formattedPreview');
+
+      if (!selectedRadio) {
+        formattedPreview.innerHTML = '<span class="text-slate-400 italic">Select options to generate review notes...</span>';
+        rawTextOutput = "";
+        return;
       }
-    } else {
-      const acctNo = getSelectValue('accountNo');
-      if (acctNo) {
-        output += `[SUBSEQUENT ORDER ATTRIBUTES]\n`;
-        output += `- Account with merchant: ${acctNo}\n\n`;
+
+      const isFirstOrder = selectedRadio.value;
+      let htmlOutput = "";
+      let textOutput = "";
+
+      // Helper function to build formatted checklist items
+      function addItem(label, value, subtext = "") {
+        if (!value) return;
+        htmlOutput += `<div><b>${label}:</b> ${value}</div>`;
+        textOutput += `${label}: ${value}\n`;
+
+        if (subtext) {
+          htmlOutput += `<div class="pl-0 text-slate-600">${subtext}</div>`;
+          textOutput += `${subtext}\n`;
+        }
       }
+
+      addItem("First Order", isFirstOrder);
+
+      // Powersearch Info
+      const psChecks = getCheckedValues('powersearchCheck');
+      const patternChecks = getCheckedValues('patternCheck');
+      const psNotes = document.getElementById('powersearchNotes').value.trim();
+
+      if (psChecks.length > 0) addItem("Verification Checks", psChecks.join(', '));
+      if (patternChecks.length > 0) addItem("Purchase Pattern", patternChecks.join(', '));
+      if (psNotes) addItem("Powersearch Notes", psNotes);
+
+      // Attributes
+      if (isFirstOrder === 'Yes') {
+        addItem("Account Status", getSelectValue('accountYes'));
+        addItem("CH Tied to BA", getSelectValue('billingSelect'));
+        addItem("CH Tied to DA", getSelectValue('deliverySelect'));
+        addItem("CH Tied to PH#", getSelectValue('phoneSelect'));
+        addItem("CH Tied to Email", getSelectValue('emailTieSelect'));
+        addItem("Email Age", getSelectValue('emailAgeSelect'));
+        addItem("IP History", getSelectValue('ipSelect'));
+        addItem("Device Analysis", getSelectValue('deviceSelect'));
+        addItem("Credit Card", getSelectValue('ccSelect'));
+      } else {
+        addItem("Account Status", getSelectValue('accountNo'));
+      }
+
+      // Summary
+      const summaryText = document.getElementById('summaryInput').value.trim();
+      if (summaryText) {
+        addItem("Comments", "", summaryText);
+      }
+
+      formattedPreview.innerHTML = htmlOutput || '<span class="text-slate-400 italic">Select options to generate review notes...</span>';
+      rawTextOutput = textOutput.trim();
     }
 
-    // Summary Block
-    const summaryText = document.getElementById('summaryInput').value.trim();
-    if (summaryText !== '') {
-      output += `========================================\nSUMMARY & FINAL DECISION:\n${summaryText}`;
+    function insertToSheet() {
+      if (!rawTextOutput) return;
+      google.script.run.withSuccessHandler(() => {
+        google.script.host.close();
+      }).insertNoteToActiveCell(rawTextOutput);
     }
 
-    formattedPreview.textContent = output.trim();
-  }
-
-  function insertToSheet() {
-    const text = document.getElementById('formattedPreview').textContent;
-    google.script.run.withSuccessHandler(() => {
-      google.script.host.close();
-    }).insertNoteToActiveCell(text);
-  }
-
-  function copyToClipboard() {
-    navigator.clipboard.writeText(document.getElementById('formattedPreview').textContent);
-  }
-</script>
+    function copyToClipboard() {
+      if (!rawTextOutput) return;
+      navigator.clipboard.writeText(rawTextOutput);
+    }
+  </script>
 </body>
 </html>
