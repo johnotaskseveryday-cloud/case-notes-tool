@@ -210,69 +210,94 @@
   </div>
 
   <script>
-    function toggleOrderQuestions(answer) {
-      document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
-      document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
-      updateLivePreview();
+  function toggleOrderQuestions(answer) {
+    document.getElementById('yesBranchSection').classList.toggle('hidden', answer !== 'Yes');
+    document.getElementById('noBranchSection').classList.toggle('hidden', answer !== 'No');
+    updateLivePreview();
+  }
+
+  function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+  }
+
+  function getSelectValue(id) {
+    const el = document.getElementById(id);
+    return (el && el.value && el.value !== "") ? el.value : null;
+  }
+
+  function updateLivePreview() {
+    const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
+    const formattedPreview = document.getElementById('formattedPreview');
+
+    if (!selectedRadio) {
+      formattedPreview.textContent = 'Select whether this is a first order...';
+      return;
     }
 
-    function getCheckedValues(name) {
-      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-    }
+    const isFirstOrder = selectedRadio.value;
+    let output = `CASE NOTES\n========================================\nFIRST ORDER: ${isFirstOrder.toUpperCase()}\n========================================\n\n`;
 
-    function updateLivePreview() {
-      const selectedRadio = document.querySelector('input[name="firstOrderRadio"]:checked');
-      const formattedPreview = document.getElementById('formattedPreview');
+    // Powersearch Info
+    const psChecks = getCheckedValues('powersearchCheck');
+    const patternChecks = getCheckedValues('patternCheck');
+    const psNotes = document.getElementById('powersearchNotes').value.trim();
 
-      if (!selectedRadio) {
-        formattedPreview.textContent = 'Select whether this is a first order...';
-        return;
-      }
-
-      const isFirstOrder = selectedRadio.value;
-      let output = `CASE NOTES\n========================================\nFIRST ORDER: ${isFirstOrder.toUpperCase()}\n========================================\n\n`;
-
-      const psChecks = getCheckedValues('powersearchCheck');
-      const patternChecks = getCheckedValues('patternCheck');
-      const psNotes = document.getElementById('powersearchNotes').value.trim();
-
+    if (psChecks.length > 0 || patternChecks.length > 0 || psNotes !== '') {
       output += `[POWERSEARCH]\n`;
-      output += `- Verification Checks: ${psChecks.length ? psChecks.join(', ') : 'None'}\n`;
-      output += `- Purchase Pattern: ${patternChecks.length ? patternChecks.join(', ') : 'None'}\n`;
-      if (psNotes) output += `- Additional Notes: ${psNotes}\n`;
+      if (psChecks.length > 0) output += `- Verification Checks: ${psChecks.join(', ')}\n`;
+      if (patternChecks.length > 0) output += `- Purchase Pattern: ${patternChecks.join(', ')}\n`;
+      if (psNotes !== '') output += `- Additional Notes: ${psNotes}\n`;
       output += `\n`;
+    }
 
-      if (isFirstOrder === 'Yes') {
+    // Branch Attributes
+    if (isFirstOrder === 'Yes') {
+      const attributes = [
+        { label: 'Account with merchant', val: getSelectValue('accountYes') },
+        { label: 'Phone', val: getSelectValue('phoneSelect') },
+        { label: 'Email Age', val: getSelectValue('emailAgeSelect') },
+        { label: 'Email Link', val: getSelectValue('emailTieSelect') },
+        { label: 'Billing Address', val: getSelectValue('billingSelect') },
+        { label: 'Delivery Address', val: getSelectValue('deliverySelect') },
+        { label: 'IP Analysis', val: getSelectValue('ipSelect') },
+        { label: 'Device Analysis', val: getSelectValue('deviceSelect') },
+        { label: 'Credit Card', val: getSelectValue('ccSelect') }
+      ].filter(attr => attr.val !== null);
+
+      if (attributes.length > 0) {
         output += `[FIRST ORDER ATTRIBUTES]\n`;
-        output += `- Account with merchant: ${document.getElementById('accountYes').value || 'N/A'}\n`;
-        output += `- Email: ${document.getElementById('emailAgeSelect').value || 'N/A'} (${document.getElementById('emailTieSelect').value || 'N/A'})\n`;
-        output += `- Phone: ${document.getElementById('phoneSelect').value || 'N/A'}\n`;
-        output += `- Billing: ${document.getElementById('billingSelect').value || 'N/A'}\n`;
-        output += `- Delivery: ${document.getElementById('deliverySelect').value || 'N/A'}\n`;
-        output += `- IP: ${document.getElementById('ipSelect').value || 'N/A'}\n`;
-        output += `- Device: ${document.getElementById('deviceSelect').value || 'N/A'}\n`;
-        output += `- Credit Card: ${document.getElementById('ccSelect').value || 'N/A'}\n\n`;
-      } else {
-        output += `[SUBSEQUENT ORDER ATTRIBUTES]\n`;
-        output += `- Account with merchant: ${document.getElementById('accountNo').value || 'N/A'}\n\n`;
+        attributes.forEach(attr => {
+          output += `- ${attr.label}: ${attr.val}\n`;
+        });
+        output += `\n`;
       }
-
-      const summaryText = document.getElementById('summaryInput').value.trim();
-      output += `========================================\nSUMMARY & FINAL DECISION:\n${summaryText || 'N/A'}`;
-
-      formattedPreview.textContent = output;
+    } else {
+      const acctNo = getSelectValue('accountNo');
+      if (acctNo) {
+        output += `[SUBSEQUENT ORDER ATTRIBUTES]\n`;
+        output += `- Account with merchant: ${acctNo}\n\n`;
+      }
     }
 
-    function insertToSheet() {
-      const text = document.getElementById('formattedPreview').textContent;
-      google.script.run.withSuccessHandler(() => {
-        google.script.host.close();
-      }).insertNoteToActiveCell(text);
+    // Summary Block
+    const summaryText = document.getElementById('summaryInput').value.trim();
+    if (summaryText !== '') {
+      output += `========================================\nSUMMARY & FINAL DECISION:\n${summaryText}`;
     }
 
-    function copyToClipboard() {
-      navigator.clipboard.writeText(document.getElementById('formattedPreview').textContent);
-    }
-  </script>
+    formattedPreview.textContent = output.trim();
+  }
+
+  function insertToSheet() {
+    const text = document.getElementById('formattedPreview').textContent;
+    google.script.run.withSuccessHandler(() => {
+      google.script.host.close();
+    }).insertNoteToActiveCell(text);
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(document.getElementById('formattedPreview').textContent);
+  }
+</script>
 </body>
 </html>
